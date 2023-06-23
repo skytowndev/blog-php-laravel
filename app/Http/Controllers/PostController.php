@@ -3,13 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
-use App\Mail\NewPostEmail;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail;
+use App\Jobs\SendNewPostEmail;
+
 
 class PostController extends Controller
 {
+
+    public function search($term) {
+        $posts = Post::search($term)->get();
+        $posts->load('user:id,username,avatar');
+        return $posts;
+    }
+
 
     public function update(Post $post, Request $request) {
         $incomingFields = $request->validate([
@@ -89,7 +96,14 @@ class PostController extends Controller
 
         $post = Post::create($incomingFields);
 
-        Mail::to('test@google.com')->send(new NewPostEmail());
+        //Mail::to('test@google.com')->send(new NewPostEmail());
+        //Mail::to(auth()->user()->email)->send(new NewPostEmail(['name' => auth()->user()->username, 'title' => $post->title]));
+
+        dispatch(new SendNewPostEmail([
+            'sendTo' => auth()->user()->email,
+            'name' => auth()->user()->username,
+            'title' => $post->title
+        ]));     
 
         return redirect("/post/{$post->id}")->with('success', 'New Post successfully created.');
     }

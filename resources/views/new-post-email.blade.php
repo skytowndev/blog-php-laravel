@@ -1,3 +1,4 @@
 <div style="font-family:sans-serif;">
-    <p>This is a <strong>Test</strong>.</p>
+    <p>Thank you for creating a new post, <strong>{{$name}}</strong>.</p>
+    <p>Your new post is named <strong>{{$title}}</strong></p>
 </div>
